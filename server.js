@@ -4,15 +4,19 @@ import "dotenv/config";
 import bcrypt from "bcrypt";
 import { nanoid } from "nanoid";
 import jwt from "jsonwebtoken";
+import cors from "cors";
 
 // Schema
 import User from "./Schema/User.js";
 
 const server = express();
-let PORT = 3000;
+let PORT = 3001;
 
 let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for email
 let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
+
+server.use(express.json());
+server.use(cors());
 
 mongoose.connect(process.env.DB_LOCATION, {
     autoIndex: true,
@@ -48,8 +52,6 @@ const generateUsername = async (email) => {
 
     return username;
 };
-
-server.use(express.json());
 
 // Sign Up
 server.post("/signup", (req, res) => {
@@ -121,7 +123,7 @@ server.post("/signin", (req, res) => {
                 (err, result) => {
                     if (err) {
                         return res.status(403).json({
-                            error: "Error occured while login please try again",
+                            error: "Error occurred while logging in. Please try again",
                         });
                     }
 
@@ -130,7 +132,8 @@ server.post("/signin", (req, res) => {
                             .status(403)
                             .json({ error: "Incorrect password" });
                     } else {
-                        return res.status(403).json(formatDataToSend(user));
+                        // Send a 200 OK response with the formatted data
+                        return res.status(200).json(formatDataToSend(user));
                     }
                 }
             );
